@@ -20,12 +20,11 @@ with open('house.csv', newline='') as csvfile:
     my_reader = csv.reader(csvfile)
     for row in my_reader:
         raw_data.append(row)
-# Delete header row
+# Delete header row (contains row names, not ints)
 del raw_data[0]
 # Convert strings to int
 data = [[int(x) for x in house] for house in raw_data]
 
-# Maybe need to normalize data: z = (x - mean) / range
 X = []
 y = []
 for house in data:
@@ -37,12 +36,12 @@ for house in data:
 X = np.array(X)
 y = np.array(y)
 
-# Normalize X to be mean=0 between -1 and 1
+# Normalize X to be mean=0 roughly between -1 and 1
 X_mean = sum(X) / len(X)
 X_range = max(X) - min(X)
 X = (X - X_mean) / X_range
 
-# Normalize y to be mean=0 between -1 and 1
+# Normalize y to be mean=0 roughly between -1 and 1
 y_mean = sum(y) / len(y)
 y_range = max(y) - min(y)
 y = (y - y_mean) / y_range
@@ -69,20 +68,18 @@ while epoch < 2000:
     dTheta[0] = sum(theta[0] + theta[1] * X - y) / m
     dTheta[1] = sum((theta[0] + theta[1] * X - y) * X) / m
     theta -= alpha * dTheta
-    # Periodically print out cost (should be decreasing)
+    # Periodically save cost for graph at end (should be decreasing)
     if epoch % 50 == 0:
         error.append([epoch, compute_cost(X, y, theta)])
-        # print(epoch, ": ", compute_cost(X, y, theta))
 
-# Un-normalize values
+# Un-normalize the values
 X = X*X_range + X_mean
 y = y*y_range + y_mean
 y_int = y_range*(theta[0] - theta[1]*X_mean/X_range) + y_mean
 slope = y_range*theta[1]/X_range
 
-print("y = %f + %f x" % (y_int, slope))
-
 plt.figure(1, figsize=(18, 8))
+
 # Plot the linear regression with data
 plt.subplot(121)    # rows, columns, which entry
 plt.scatter(X, y)
